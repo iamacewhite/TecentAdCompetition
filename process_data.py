@@ -5,16 +5,16 @@ import os
 import csv
 import hashlib
 
-path = "joined.csv"
+path = "joined_test.csv"
 categorical = ["clickTime", "creativeID", "userID", "positionID", "connectionType", "telecomsOperator", "adID", "camgaignID", "advertiserID", "Ad_appID", "appPlatform", "gender", "education", "marriageStatus", "haveBaby", "hometown", "residence", "sitesetID", "positionType", "appCategory"]
 numerical = ["age"]
-NR_BINS = 100000000
+NR_BINS = 10000000
 
 def hashstr(input):
     return str(int(hashlib.md5(input.encode('utf8')).hexdigest(), 16)%(NR_BINS-1)+1)
 def csvToFFM():
     joinedData = csv.DictReader(open(path, 'r'))
-    ffmFile = open("ffm.txt", 'w')
+    ffmFile = open("ffm-test.txt", 'w')
     for row in joinedData:
         ffmFile.write(row['label']+" ")
         line = []

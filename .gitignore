@@ -2,3 +2,6 @@
 *.p
 *.txt
 *.bin
+model*
+output*
+submission*
