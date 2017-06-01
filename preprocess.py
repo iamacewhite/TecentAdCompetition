@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
 import csv, os
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("mode", help="train or test")
+args = parser.parse_args()
 
 path = '/media/ace/Data/Ace/datasets/tecent/pre'
 
@@ -84,7 +88,7 @@ def main():
     for f in os.listdir(path):
         tempFile = pd.read_csv(os.path.join(path, f))
         content[f.replace('.csv', '')] = tempFile
-    result = pd.merge(content['test'], content['ad'], on='creativeID')
+    result = pd.merge(content[args.mode], content['ad'], on='creativeID')
     result = pd.merge(result, content['user'], on='userID')
     result = pd.merge(result, content['position'], on='positionID')
     result = pd.merge(result, content['app_categories'], on='appID')
@@ -94,12 +98,11 @@ def main():
     result = pd.merge(result, splitHometown(os.path.join(path, 'user.csv')), on='userID')
     result = pd.merge(result, splitResidence(os.path.join(path, 'user.csv')), on='userID')
     result = result.rename(columns={'appID': 'Ad_appID'})
-    #result = pd.merge(result, content['user_app_actions'], on='userID')
-    #result = result.rename(columns={'appID': 'Action_appID'})
-    #result = result.drop('conversionTime', 1)
-    #result.query('clickTime < 300000')
-    #print result
-    result.to_csv(os.path.join('.', 'joined_test.csv'), index=False)
+    if args.mode == 'train':
+        result = result.drop('conversionTime', 1)
+        result.to_csv(os.path.join('.', 'joined.csv'), index=False)
+    else:
+        result.to_csv(os.path.join('.', 'joined_test.csv'), index=False)
 
 if __name__ == '__main__':
     main()
