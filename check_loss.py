@@ -22,7 +22,7 @@ else:
     with open('output') as f:
         predictions = map(float, [item.strip() for item in f.readlines()])
 #data = pd.read_csv(os.path.join(path, 'joined.csv'))
-with open('ffm_test.txt') as f:
+with open('ffm_validate.txt') as f:
     data = [item.split()[0] for item in f.readlines()]
     target = map(int, data)
 #target = data['label'][3000000:]

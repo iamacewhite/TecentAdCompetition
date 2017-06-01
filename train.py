@@ -2,11 +2,10 @@ from __future__ import print_function
 import numpy as np
 import pandas as pd
 import os
-
 import pywFM
 import pickle
 import scipy as sp
-
+from sklearn.metrics import *
 def logloss(act, pred):
   epsilon = 1e-2
   pred = sp.maximum(epsilon, pred)
@@ -32,7 +31,7 @@ model = fm.run(data[:3000000], target[:3000000], data[3000000:], target[3000000:
 #print(model.predictions)
 # you can also get the model weights
 #print(model.weights)
-print("loss: %f" % logloss(target[3000000:],model.predictions))
+print("loss: %f" % log_loss(target[3000000:],model.predictions))
 pickle.dump(model.predictions, open( "predictions.p", "wb" ))
 
 #pickle.dump(instances, open( "instances.p", "wb" ))
