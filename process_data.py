@@ -4,8 +4,14 @@ import pandas as pd
 import os
 import csv
 import hashlib
-
-path = "joined_test.csv"
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("mode", help="train or test")
+args = parser.parse_args()
+if args.mode == 'test':
+    path = "joined_test.csv"
+else:
+    path = "joined.csv"
 categorical = ["clickTime", "creativeID", "userID", "positionID", "connectionType", "telecomsOperator", "adID", "camgaignID", "advertiserID", "Ad_appID", "appPlatform", "gender", "education", "marriageStatus", "haveBaby", "hometown", "residence", "sitesetID", "positionType", "appCategory"]
 numerical = ["age"]
 NR_BINS = 3000000
@@ -15,7 +21,12 @@ def hashstr(input):
 
 def csvToFFM():
     joinedData = csv.DictReader(open(path, 'r'))
-    ffmFile = open("ffm-test.txt", 'w')
+    if args.mode == 'test':
+        fname = "ffm_test.txt"
+    else:
+        fname = "ffm.txt"
+
+    ffmFile = open(fname, 'w')
     for row in joinedData:
         ffmFile.write(row['label']+" ")
         line = []

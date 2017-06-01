@@ -1,16 +1,19 @@
-import os
 import pandas as pd
 import numpy as np
-import csv
+import csv, os
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("mode", help="train or test")
+args = parser.parse_args()
 
 path = './pre'
 
 def appadIDCount():
-    adFile = open('pre/ad.csv', 'r')
+    adFile = open(os.path.join(path, 'ad.csv'), 'r')
     adData = pd.read_csv(adFile)
     ids = pd.Series.unique(adData['appID'])
     adFile.close()
-    adFile = open('pre/ad.csv', 'r')
+    adFile = open(os.path.join(path, 'ad.csv'), 'r')
     adDict = csv.DictReader(adFile)
     idCount = {}
     for id in ids:
@@ -25,11 +28,11 @@ def appadIDCount():
     return result
 
 def appCampaignIDCount():
-    adFile = open('pre/ad.csv', 'r')
+    adFile = open(os.path.join(path, 'ad.csv'), 'r')
     adData = pd.read_csv(adFile)
     ids = pd.Series.unique(adData['appID'])
     adFile.close()
-    adFile = open('pre/ad.csv', 'r')
+    adFile = open(os.path.join(path, 'ad.csv'), 'r')
     adDict = csv.DictReader(adFile)
     idCount = {}
     for id in ids:
@@ -104,18 +107,15 @@ def main():
     result = pd.merge(result, content['app_categories'], on='appID')
     result = pd.merge(result, appadIDCount(), on='appID')
     result = pd.merge(result, appCampaignIDCount(), on='appID')
-    result = pd.merge(result, splitCategory('pre/app_categories.csv'), on='appID')
-    result = pd.merge(result, splitHometown('pre/user.csv'), on='userID')
-    result = pd.merge(result, splitResidence('pre/user.csv'), on='userID')
+    result = pd.merge(result, splitCategory(os.path.join(path, 'app_categories.csv')), on='appID')
+    result = pd.merge(result, splitHometown(os.path.join(path, 'user.csv')), on='userID')
+    result = pd.merge(result, splitResidence(os.path.join(path, 'user.csv')), on='userID')
     result = result.rename(columns={'appID': 'Ad_appID'})
-    #result = pd.merge(result, content['user_app_actions'], on='userID')
-    #result = result.rename(columns={'appID': 'Action_appID'})
-    #result = result.drop('conversionTime', 1)
-    #result.query('clickTime < 300000')
-    #print result
-    result.to_csv(os.path.join(path, 'joined_test.csv'), index=False)
+    if args.mode == 'train':
+        result = result.drop('conversionTime', 1)
+        result.to_csv(os.path.join('.', 'joined.csv'), index=False)
+    else:
+        result.to_csv(os.path.join('.', 'joined_test.csv'), index=False)
 
 if __name__ == '__main__':
     main()
-    #csvdata = pd.read_csv('pre/test.csv')
-    #print(splitHour('pre/test.csv',inplaceMergeSrc=csvdata))
