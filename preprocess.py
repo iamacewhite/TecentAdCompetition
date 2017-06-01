@@ -98,9 +98,8 @@ def main():
     for f in os.listdir(path):
         tempFile = pd.read_csv(os.path.join(path, f))
         content[f.replace('.csv', '')] = tempFile
-    mode = 'test'
-    result = splitWeekday('pre/{0}.csv'.format(mode),inplaceMergeSrc=content[mode])
-    result = splitHour('pre/{0}.csv'.format(mode),inplaceMergeSrc=result)
+    result = splitWeekday(os.path.join(path, '{0}.csv'.format(args.mode)), inplaceMergeSrc=content[args.mode])
+    result = splitHour(os.path.join('{0}.csv'.format(args.mode)), inplaceMergeSrc=result)
     result = pd.merge(result, content['ad'], on='creativeID')
     result = pd.merge(result, content['user'], on='userID')
     result = pd.merge(result, content['position'], on='positionID')
