@@ -8,7 +8,7 @@ import hashlib
 path = "joined_test.csv"
 categorical = ["clickTime", "creativeID", "userID", "positionID", "connectionType", "telecomsOperator", "adID", "camgaignID", "advertiserID", "Ad_appID", "appPlatform", "gender", "education", "marriageStatus", "haveBaby", "hometown", "residence", "sitesetID", "positionType", "appCategory"]
 numerical = ["age"]
-NR_BINS = 10000000
+NR_BINS = 3000000
 
 def hashstr(input):
     return str(int(hashlib.md5(input.encode('utf8')).hexdigest(), 16)%(NR_BINS-1)+1)
