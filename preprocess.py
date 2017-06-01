@@ -43,6 +43,36 @@ def appCampaignIDCount():
     result = pd.DataFrame({'appID': ids, 'appCampaignIdCount': count})
     return result
 
+def splitFeature(filename,IDFieldName,FieidtoSpilt,NewFieldName,startIndex=None,endIndex=None):
+    with open(filename,'r') as csvFile:
+        csvData = csv.DictReader(csvFile)
+        IDs=[]
+        tmps=[]
+        for row in csvData:
+            if not startIndex:
+                tmp = row[FieidtoSpilt][:endIndex]
+            elif not endIndex:
+                tmp = row[FieidtoSpilt][startIndex:]
+            else:
+                tmp =  row[FieidtoSpilt][startIndex:endIndex]
+
+            if not tmp:
+                tmp=0
+            tmps.append(int(tmp))
+            IDs.append(int(row[IDFieldName]))
+    result = pd.DataFrame({IDFieldName:IDs,NewFieldName:tmps})
+    print(result)
+    return result
+
+def splitCategory(filename):
+    return splitFeature(filename,'appID','appCategory','appFirstLevelCategory',endIndex=1)    
+
+def splitHometown(filename):
+    return splitFeature(filename,'userID','hometown','hometownProvince',endIndex=-2)
+
+def splitResidence(filename):
+    return splitFeature(filename,'userID','residence','residenceProvince',endIndex=-2)    
+
 def main():
     content = {}
     for f in os.listdir(path):
@@ -64,4 +94,14 @@ def main():
 
 if __name__ == '__main__':
     #main()
-    appCampaignIDCount()
+    result1 = splitHometown('pre/user.csv')
+    result2 = splitResidence('pre/user.csv')
+    userData = pd.read_csv('pre/user.csv')
+    tmp = pd.merge(result1,result2,on='userID')
+    print(pd.merge(userData,tmp,on='userID'))
+    '''
+    result = splitCategory('pre/app_categories.csv')
+    adData = pd.read_csv('pre/app_categories.csv')
+    print(adData)
+    print(pd.merge(adData,result, on='appID'))
+    '''
