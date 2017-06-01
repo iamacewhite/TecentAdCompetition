@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import csv
 
-path = '/media/ace/Data/Ace/datasets/tecent/pre'
+path = './pre'
 
 def appadIDCount():
     adFile = open('pre/ad.csv', 'r')
@@ -43,11 +43,12 @@ def appCampaignIDCount():
     result = pd.DataFrame({'appID': ids, 'appCampaignIdCount': count})
     return result
 
-def splitFeature(filename,IDFieldName,FieidtoSpilt,NewFieldName,startIndex=None,endIndex=None,postprocessFunction=None):
+def splitFeature(filename,IDFieldName,FieidtoSpilt,NewFieldName,startIndex=None,endIndex=None,postprocessFunction=None,inplaceMergeSrc=None):
     with open(filename,'r') as csvFile:
         csvData = csv.DictReader(csvFile)
         IDs=[]
         tmps=[]
+
         for row in csvData:
             if not startIndex:
                 tmp = row[FieidtoSpilt][:endIndex]
@@ -60,12 +61,18 @@ def splitFeature(filename,IDFieldName,FieidtoSpilt,NewFieldName,startIndex=None,
                 tmp=0
 
             if postprocessFunction:
-                tmp = postprocessFunction(tmp)
+                tmp = postprocessFunction(int(tmp))
 
             tmps.append(int(tmp))
-            IDs.append(int(row[IDFieldName]))
-    result = pd.DataFrame({IDFieldName:IDs,NewFieldName:tmps})
-    print(result)
+            if IDFieldName:
+                IDs.append(int(row[IDFieldName]))   
+
+    if inplaceMergeSrc is not None:
+        inplaceMergeSrc[NewFieldName] = tmps
+        result = inplaceMergeSrc
+    else:
+        result = pd.DataFrame({IDFieldName:IDs,NewFieldName:tmps})
+
     return result
 
 def splitCategory(filename):
@@ -77,15 +84,21 @@ def splitHometown(filename):
 def splitResidence(filename):
     return splitFeature(filename,'userID','residence','residenceProvince',endIndex=-2)    
 
-def splitWeekday(filename):
-    return splitFeature(filename,'')
+def splitWeekday(filename,inplaceMergeSrc=None):
+    return splitFeature(filename,'','clickTime','weekDay',endIndex=2,postprocessFunction=lambda x: x%7,inplaceMergeSrc=inplaceMergeSrc)
+
+def splitHour(filename,inplaceMergeSrc=None):
+    return splitFeature(filename,'','clickTime','Hour',startIndex=2,endIndex=4,inplaceMergeSrc=inplaceMergeSrc)
 
 def main():
     content = {}
     for f in os.listdir(path):
         tempFile = pd.read_csv(os.path.join(path, f))
         content[f.replace('.csv', '')] = tempFile
-    result = pd.merge(content['test'], content['ad'], on='creativeID')
+    mode = 'test'
+    result = splitWeekday('pre/{0}.csv'.format(mode),inplaceMergeSrc=content[mode])
+    result = splitHour('pre/{0}.csv'.format(mode),inplaceMergeSrc=result)
+    result = pd.merge(result, content['ad'], on='creativeID')
     result = pd.merge(result, content['user'], on='userID')
     result = pd.merge(result, content['position'], on='positionID')
     result = pd.merge(result, content['app_categories'], on='appID')
@@ -103,15 +116,6 @@ def main():
     result.to_csv(os.path.join(path, 'joined_test.csv'), index=False)
 
 if __name__ == '__main__':
-    #main()
-    result1 = splitHometown('pre/user.csv')
-    result2 = splitResidence('pre/user.csv')
-    userData = pd.read_csv('pre/user.csv')
-    tmp = pd.merge(result1,result2,on='userID')
-    print(pd.merge(userData,tmp,on='userID'))
-    '''
-    result = splitCategory('pre/app_categories.csv')
-    adData = pd.read_csv('pre/app_categories.csv')
-    print(adData)
-    print(pd.merge(adData,result, on='appID'))
-    '''
+    main()
+    #csvdata = pd.read_csv('pre/test.csv')
+    #print(splitHour('pre/test.csv',inplaceMergeSrc=csvdata))
