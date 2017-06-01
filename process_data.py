@@ -12,6 +12,7 @@ NR_BINS = 3000000
 
 def hashstr(input):
     return str(int(hashlib.md5(input.encode('utf8')).hexdigest(), 16)%(NR_BINS-1)+1)
+
 def csvToFFM():
     joinedData = csv.DictReader(open(path, 'r'))
     ffmFile = open("ffm-test.txt", 'w')

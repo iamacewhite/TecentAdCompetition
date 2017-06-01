@@ -5,3 +5,5 @@
 model*
 output*
 submission*
+pre/
+venv/
