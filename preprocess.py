@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("mode", help="train or test")
 args = parser.parse_args()
 
-path = './pre'
+path = '/media/ace/Data/Ace/datasets/tecent/pre'
 
 def appadIDCount():
     adFile = open(os.path.join(path, 'ad.csv'), 'r')
