@@ -53,7 +53,9 @@ def splitFeature(filename,IDFieldName,FieidtoSpilt,NewFieldName,startIndex=None,
         tmps=[]
 
         for row in csvData:
-            if not startIndex:
+            if not startIndex and not endIndex:
+                tmp = row[FieidtoSpilt]
+            elif not startIndex:
                 tmp = row[FieidtoSpilt][:endIndex]
             elif not endIndex:
                 tmp = row[FieidtoSpilt][startIndex:]
@@ -78,6 +80,16 @@ def splitFeature(filename,IDFieldName,FieidtoSpilt,NewFieldName,startIndex=None,
 
     return result
 
+def discreteFeature(filename,IDFieldName,FieidtoDiscrete,NewFieldName,startIndex=None,endIndex=None,threshold,inplaceMergeSrc=None,zeroRepresentUnknown=False):
+    def discrete(value):
+        if zeroRepresentUnknown and value == 0:
+            return 0
+        for index, curThreshold in enumerate(threshold):
+            if value<curThreshold:
+                return index+1
+        return index+2
+    return splitFeature(filename,IDFieldName,FieidtoDiscrete,NewFieldName,startIndex=startIndex,endIndex=endIndex,postprocessFunction=discrete,inplaceMergeSrc=inplaceMergeSrc)
+
 def splitCategory(filename):
     return splitFeature(filename,'appID','appCategory','appFirstLevelCategory',endIndex=1)    
 
@@ -92,6 +104,14 @@ def splitWeekday(filename,inplaceMergeSrc=None):
 
 def splitHour(filename,inplaceMergeSrc=None):
     return splitFeature(filename,'','clickTime','Hour',startIndex=2,endIndex=4,inplaceMergeSrc=inplaceMergeSrc)
+
+def discreteAge(filename):
+    ageThreshold=[7,18,41,66,80]
+    return discreteFeature(filename,'userID','age','ageCategory',threshold=ageThreshold,zeroRepresentUnknown=True)
+
+def discreteClickTime(filename):
+    timeThreshold=[7,12,19]
+    return discreteFeature(filename,'','clickTime','clickTimeCategory',startIndex=2,endIndex=4,threshold=timeThreshold,inplaceMergeSrc=True)
 
 def main():
     content = {}
