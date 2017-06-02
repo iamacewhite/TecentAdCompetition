@@ -80,7 +80,7 @@ def splitFeature(filename,IDFieldName,FieidtoSpilt,NewFieldName,startIndex=None,
 
     return result
 
-def discreteFeature(filename,IDFieldName,FieidtoDiscrete,NewFieldName,startIndex=None,endIndex=None,threshold,inplaceMergeSrc=None,zeroRepresentUnknown=False):
+def discreteFeature(filename,IDFieldName,FieidtoDiscrete,NewFieldName,startIndex=None,endIndex=None,threshold=[],inplaceMergeSrc=None,zeroRepresentUnknown=False):
     def discrete(value):
         if zeroRepresentUnknown and value == 0:
             return 0
@@ -109,9 +109,9 @@ def discreteAge(filename):
     ageThreshold=[7,18,41,66,80]
     return discreteFeature(filename,'userID','age','ageCategory',threshold=ageThreshold,zeroRepresentUnknown=True)
 
-def discreteClickTime(filename):
+def discreteClickTime(filename,inplaceMergeSrc=None):
     timeThreshold=[7,12,19]
-    return discreteFeature(filename,'','clickTime','clickTimeCategory',startIndex=2,endIndex=4,threshold=timeThreshold,inplaceMergeSrc=True)
+    return discreteFeature(filename,'','clickTime','clickTimeCategory',startIndex=2,endIndex=4,threshold=timeThreshold,inplaceMergeSrc=inplaceMergeSrc)
 
 def main():
     content = {}
@@ -119,7 +119,9 @@ def main():
         tempFile = pd.read_csv(os.path.join(path, f))
         content[f.replace('.csv', '')] = tempFile
     result = splitWeekday(os.path.join(path, '{0}.csv'.format(args.mode)), inplaceMergeSrc=content[args.mode])
-    result = splitHour(os.path.join('{0}.csv'.format(args.mode)), inplaceMergeSrc=result)
+    result = splitHour(os.path.join(path,'{0}.csv'.format(args.mode)), inplaceMergeSrc=result)
+    result = discreteClickTime(os.path.join(path,'{0}.csv'.format(args.mode)), inplaceMergeSrc=result)
+    result = pd.merge(result, discreteAge(os.path.join(path, 'user.csv')), on='userID')
     result = pd.merge(result, content['ad'], on='creativeID')
     result = pd.merge(result, content['user'], on='userID')
     result = pd.merge(result, content['position'], on='positionID')
