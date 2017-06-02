@@ -12,7 +12,7 @@ if args.mode == 'test':
     path = "joined_test.csv"
 else:
     path = "joined.csv"
-categorical = ["clickTime", "creativeID", "userID", "positionID", "connectionType", "telecomsOperator", "weekDay", "hour", "clickTimeCategory", "ageCategory", "adID", "camgaignID", "advertiserID", "Ad_appID", "appPlatform", "gender", "education", "marriageStatus", "haveBaby", "hometown", "residence", "sitesetID", "positionType", "appCategory", "appFirstLevelCategory", "hometownProvince", "residenceProvince", "isHometownAndResidenceProvinceSame"]
+categorical = ["clickTime", "creativeID", "userID", "positionID", "connectionType", "telecomsOperator", "weekDay", "Hour", "clickTimeCategory", "ageCategory", "adID", "camgaignID", "advertiserID", "Ad_appID", "appPlatform", "gender", "education", "marriageStatus", "haveBaby", "hometown", "residence", "sitesetID", "positionType", "appCategory", "appFirstLevelCategory", "hometownProvince", "residenceProvince", "isHometownAndResidenceProvinceSame"]
 numerical = ["age", "appAdIdCount", "appCampaignIdCount"]
 NR_BINS = 3000000
 
