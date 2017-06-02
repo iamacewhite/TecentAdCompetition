@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 import csv, os
 import argparse
+import json
+import time
+
 parser = argparse.ArgumentParser()
 parser.add_argument("mode", help="train or test")
 args = parser.parse_args()
@@ -123,6 +126,47 @@ def IsHometownAndResidenceProvinceSame(pdDataframe):
             return 2
     pdDataframe['isHometownAndResidenceProvinceSame'] = pdDataframe.apply(lambda row: isSame(row['hometownProvince'],row['residenceProvince']), axis=1)
 
+#count is stored using a json string
+def processInstalledApp(mode):
+    result = None
+    with open(path + '/user_installedapps.csv', 'r') as installedFile:
+        with open(path + '/app_categories.csv', 'r') as categoryFile:
+            installedPd = pd.read_csv(installedFile)
+            categoryPd = pd.read_csv(categoryFile)
+            ids = pd.Series.unique(installedPd['userID'])
+            categories = pd.Series.unique(categoryPd['appCategory'])
+            app_category_Mapping = {}
+            for _, appCategory in categoryPd.iterrows():
+                app_category_Mapping[int(appCategory['appID'])] = appCategory['appCategory']
+            if mode == "ID":
+                userApp = {key:"" for key in ids}
+                for id in ids:
+                    userApp[id] = ""
+                for _, row in installedPd.iterrows():
+                    userApp[int(row['userID'])] += str(row['appID'])
+                result = pd.DataFrame({'userID': userApp.keys(), 'userAppID': userApp.values()})
+            if mode == "Category":
+                print "Category"
+                userAppCategory = {key: {x:0 for x in categories} for key in ids}
+                for _, row in installedPd.iterrows():
+                    UserID = int(row["userID"])
+                    AppID = int(row["appID"])
+                    userAppCategory[UserID][app_category_Mapping[AppID]] += 1
+                print "finish count"
+                result = pd.DataFrame({'userID': userAppCategory.keys(), 'CategoryCount': userAppCategory.values()})
+                result.to_csv('categoryCount.csv', sep=',')
+            if mode == "appCount":
+                print "appCount"
+                userAppCount = {int(key): 0 for key in ids}
+                for _, row in installedPd.iterrows():
+                    userAppCount[int(row['userID'])] += 1
+                print "finish Count"
+                result = pd.DataFrame({'userID': userAppCount.keys(), 'appCount': userAppCount.values()})
+                result.to_csv('appCount.csv', sep=',')
+    return result
+
+
+
 
 def main():
     content = {}
@@ -151,4 +195,7 @@ def main():
         result.to_csv(os.path.join('.', 'joined_test.csv'), index=False)
 
 if __name__ == '__main__':
-    main()
+    #main()
+    start = time.time()
+    print processInstalledApp('appCount')
+    print "time cost: " + str(time.time() - start)
