@@ -113,6 +113,17 @@ def discreteClickTime(filename,inplaceMergeSrc=None):
     timeThreshold=[7,12,19]
     return discreteFeature(filename,'','clickTime','clickTimeCategory',startIndex=2,endIndex=4,threshold=timeThreshold,inplaceMergeSrc=inplaceMergeSrc)
 
+def IsHometownAndResidenceProvinceSame(pdDataframe):
+    def isSame(x,y):
+        if x==0 or y==0:
+            return 0
+        elif x==y:
+            return 1
+        else:
+            return 2
+    pdDataframe['isHometownAndResidenceProvinceSame'] = pdDataframe.apply(lambda row: isSame(row['hometownProvince'],row['residenceProvince']), axis=1)
+
+
 def main():
     content = {}
     for f in os.listdir(path):
@@ -131,6 +142,7 @@ def main():
     result = pd.merge(result, splitCategory(os.path.join(path, 'app_categories.csv')), on='appID')
     result = pd.merge(result, splitHometown(os.path.join(path, 'user.csv')), on='userID')
     result = pd.merge(result, splitResidence(os.path.join(path, 'user.csv')), on='userID')
+    IsHometownAndResidenceProvinceSame(result)
     result = result.rename(columns={'appID': 'Ad_appID'})
     if args.mode == 'train':
         result = result.drop('conversionTime', 1)
