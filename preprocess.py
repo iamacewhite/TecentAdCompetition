@@ -177,6 +177,8 @@ def main():
     for f in os.listdir(path):
         tempFile = pd.read_csv(os.path.join(path, f))
         content[f.replace('.csv', '')] = tempFile
+    appCount = pd.read_csv(open('appCount.csv', 'r'))
+    appCategoryCount = pd.read_csv(open('appCategoryCount.csv', 'r'))
     result = splitWeekday(os.path.join(path, '{0}.csv'.format(args.mode)), inplaceMergeSrc=content[args.mode])
     result = splitHour(os.path.join(path,'{0}.csv'.format(args.mode)), inplaceMergeSrc=result)
     result = discreteClickTime(os.path.join(path,'{0}.csv'.format(args.mode)), inplaceMergeSrc=result)
@@ -190,6 +192,9 @@ def main():
     result = pd.merge(result, splitCategory(os.path.join(path, 'app_categories.csv')), on='appID')
     result = pd.merge(result, splitHometown(os.path.join(path, 'user.csv')), on='userID')
     result = pd.merge(result, splitResidence(os.path.join(path, 'user.csv')), on='userID')
+    result = pd.merge(result, appCount, on='userID')
+    result = pd.merge(result, appCategoryCount, on='userID')
+    result = pd.merge(result, CountUserPerApp(), on='appID')
     IsHometownAndResidenceProvinceSame(result)
     result = result.rename(columns={'appID': 'Ad_appID'})
     if args.mode == 'train':
@@ -199,7 +204,6 @@ def main():
         result.to_csv(os.path.join('.', 'joined_test.csv'), index=False)
 
 if __name__ == '__main__':
-    #main()
     start = time.time()
-    print processInstalledApp('appCount')
+    main()
     print "time cost: " + str(time.time() - start)
