@@ -39,6 +39,18 @@ def ensemble(mode, calc):
                 output.append(np.mean(smaller))
         write_to_file(mode, output, calc)
 
+    elif calc == 'minmax after vote':
+        outputs = zip(*outputs)
+        output = []
+        for row in outputs:
+            larger = filter(lambda x: x>=0.5, row)
+            smaller = filter(lambda x: x<0.5, row)
+            if len(larger) > len(smaller):
+                output.append(max(larger))
+            else:
+                output.append(min(smaller))
+        write_to_file(mode, output, calc)
+
 def write_to_file(mode, output, calc):
     if mode == 'validate':
         with open('output', 'w+') as f:
@@ -53,7 +65,8 @@ def write_to_file(mode, output, calc):
 
 
 if __name__ == "__main__":
-    #ensemble('validate', 'mean')
-    #ensemble('validate', 'vote')
+    ensemble('validate', 'mean')
+    ensemble('validate', 'vote')
     ensemble('validate', 'mean after vote')
-    ensemble('test', 'mean after vote')
+    ensemble('validate', 'minmax after vote')
+    #ensemble('test', 'mean after vote')

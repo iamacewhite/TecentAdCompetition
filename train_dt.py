@@ -9,7 +9,11 @@ from sklearn.model_selection import *
 from xgboost import XGBClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 
-mode = 'rf'
+def logloss(y_pred, y_true):
+    loss = log_loss(list(y_pred), list(y_true.get_label()))
+    return ('validation', loss)
+
+mode = 'xgb'
 path = '.'
 test_data = pd.read_csv(os.path.join(path, 'joined_test.csv'))
 instances = test_data['instanceID']
@@ -30,21 +34,29 @@ X_test.dropna()
 eval_set = [(X_test, y_test)]
 
 if mode == 'rf':
-    model = RandomForestClassifier(n_estimators = 3000, n_jobs = -1, verbose=True)
+    model = RandomForestClassifier(n_estimators = 2000, n_jobs = -1, verbose=True)
     model.fit(X_train, y_train)
 elif mode == 'ada':
     model = AdaBoostClassifier(n_estimators=1000, learning_rate=0.9)
     model.fit(X_train, y_train)
 else:
-    model = XGBClassifier(max_depth=100, n_estimators=10000, nthread=12)
-    model.fit(X_train, y_train, eval_metric="logloss", eval_set=eval_set, early_stopping_rounds=20, verbose=True)
-
-if mode != 'xgb':
-    predictions = model.predict(X_test)
+    model = XGBClassifier(max_depth=6, n_estimators=2000, nthread=8)
+    model.fit(X_train, y_train, eval_metric='logloss', eval_set=eval_set, early_stopping_rounds=2, verbose=True)
+    limit = model.best_iteration
+if mode == 'xgb':
+    predictions = model.predict_proba(X_test, ntree_limit=limit+1)
 else:
     predictions = model.predict_proba(X_test)
 
 print("loss: %f" % log_loss(y_test, predictions))
 
 
+if mode == 'xgb':
+    result = model.predict_proba(test_data, ntree_limit=limit+1)
+else:
+    result = model.predict_proba(test_data)
 
+with open('submission', 'w+') as f:
+    for row in result:
+        f.write(str(row))
+pickle.dump(open('model_{}'.format(mode), 'wb'))
