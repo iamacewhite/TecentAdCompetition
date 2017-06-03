@@ -165,7 +165,11 @@ def processInstalledApp(mode):
                 result.to_csv('appCount.csv', sep=',')
     return result
 
-
+def CountUserPerApp():
+    result = None
+    installed = pd.read_csv(open('pre/user_installedapps.csv','r'))
+    result = installed.groupby("appID")["appID"].count().reset_index(name="appUserCount")
+    return result
 
 
 def main():
